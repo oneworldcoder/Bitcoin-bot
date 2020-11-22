@@ -1,9 +1,10 @@
-import os
-for dirname, _, filenames in os.walk('/kaggle/input'):
-    for filename in filenames:
-        print(os.path.join(dirname, filename))
+# import os
+# for dirname, _, filenames in os.walk('/kaggle/input'):
+#     for filename in filenames:
+#         print(os.path.join(dirname, filename))
         
-!pip install jovian --upgrade --quiet
+# !pip install jovian --upgrade --quiet
+!pip install pmdarima
 
 import jovian
 import numpy as np
@@ -24,7 +25,7 @@ import torchvision.transforms as transforms
 
 project = "bitcoin-bot"
 
-DATASET_URL = "/kaggle/input/btc-2012-to-2020/bitstampUSD_1-min_data_2012-01-01_to_2020-09-14.csv"
+DATASET_URL = "/content/bitstampUSD_1-min_data_2012-01-01_to_2020-09-14.csv"
 
 data = pd.read_csv(DATASET_URL)
 
@@ -46,24 +47,21 @@ from pmdarima import auto_arima
 import warnings
 warnings.filterwarnings("ignore")
 
-# from statsmodels.tsa.stattools import adfuller
+from statsmodels.tsa.stattools import adfuller
 
-# def ad_test(df):
-#      df = adfuller(df, autolag = 'AIC')
-#      print("1. ADF : ",df[0])
-#      print("2. P-Value : ", df[1])
-#      print("3. Num Of Lags : ", df[2])
-#      print("4. Num Of Observations Used For ADF Regression:", df[3])
-#      print("5. Critical Values :")
-#      for key, val in df[4].items():
-#          print("\t",key, ": ", val)
+def ad_test(df):
+     df = adfuller(df, autolag = 'AIC')
+     print("1. ADF : ",df[0])
+     print("2. P-Value : ", df[1])
+     print("3. Num Of Lags : ", df[2])
+     print("4. Num Of Observations Used For ADF Regression:", df[3])
+     print("5. Critical Values :")
+     for key, val in df[4].items():
+         print("\t",key, ": ", val)
 
-# ad_test(df['High'])
+ad_test(df['High'])
 
 fit = auto_arima(y_train, trace= True, supress_warnings= True)
 fit.summary()
-
-
-
 
 jovian.commit(project=project)
