@@ -27,41 +27,19 @@ project = "bitcoin-bot"
 
 DATASET_URL = "/content/bitstampUSD_1-min_data_2012-01-01_to_2020-09-14.csv"
 
-data = pd.read_csv(DATASET_URL)
+df = pd.read_csv(DATASET_URL)
+df['date'] = pd.to_datetime(df['Timestamp'],unit='s').dt.date
+group = df.groupby('date')
+Real_Price = group['Weighted_Price'].mean()
 
-data.head()
+prediction_days = 30
+df_train= Real_Price[len(Real_Price)-prediction_days:]
+df_test= Real_Price[:len(Real_Price)-prediction_days]
 
-df= data.dropna()
-df
-
-df['High'].plot(figsize=(12,8))
-
-X = df[['Timestamp', 'Open', 'Low', 'Close', 'Volume_(BTC)', 'Volume_(Currency)', 'Weighted_Price']].values
-y = df[['High']]
-
-
-X_train, X_test, y_train, y_test =  train_test_split(X, y, test_size=0.2)
-
-
-from pmdarima import auto_arima
-import warnings
-warnings.filterwarnings("ignore")
-
-from statsmodels.tsa.stattools import adfuller
-
-def ad_test(df):
-     df = adfuller(df, autolag = 'AIC')
-     print("1. ADF : ",df[0])
-     print("2. P-Value : ", df[1])
-     print("3. Num Of Lags : ", df[2])
-     print("4. Num Of Observations Used For ADF Regression:", df[3])
-     print("5. Critical Values :")
-     for key, val in df[4].items():
-         print("\t",key, ": ", val)
-
-ad_test(df['High'])
-
-fit = auto_arima(y_train, trace= True, supress_warnings= True)
-fit.summary()
-
-jovian.commit(project=project)
+training_set = df_train.values
+training_set = np.reshape(training_set, (len(training_set), 1))
+sc = MinMaxScaler()
+training_set = sc.fit_transform(training_set)
+X_train = training_set[0:len(training_set)-1]
+y_train = training_set[1:len(training_set)]
+X_train = np.reshape(X_train, (len(X_train), 1, 1))
