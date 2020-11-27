@@ -63,3 +63,11 @@ regressor.compile(optimizer = 'adam', loss = 'mean_squared_error')
 
 # Fitting the RNN to the Training set
 regressor.fit(X_train, y_train, batch_size = 5, epochs = 100)
+
+test_set = df_test.values[1:]
+sc = MinMaxScaler()
+inputs = np.reshape(df_test.values[0:len(df_test)-1], (len(test_set), 1))
+inputs = sc.transform(inputs)
+inputs = np.reshape(inputs, (len(inputs), 1, 1))
+predicted_BTC_price = regressor.predict(inputs)
+predicted_BTC_price = sc.inverse_transform(predicted_BTC_price)
