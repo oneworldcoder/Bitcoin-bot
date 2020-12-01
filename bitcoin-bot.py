@@ -73,3 +73,21 @@ print(inputs)
 
 predicted_BTC_price = regressor.predict(inputs)
 predicted_BTC_price = sc.inverse_transform(predicted_BTC_price)
+
+plt.figure(figsize=(25,15), dpi=80, facecolor='w', edgecolor='k')
+ax = plt.gca()  
+plt.plot(test_set, color = 'red', label = 'Real BTC Price')
+plt.plot(predicted_BTC_price, color = 'blue', label = 'Predicted BTC Price')
+plt.title('BTC Price Prediction', fontsize=40)
+df_test = df_test.reset_index()
+x=df_test.index
+labels = df_test['date']
+plt.xticks(x, labels, rotation = 'vertical')
+for tick in ax.xaxis.get_major_ticks():
+    tick.label1.set_fontsize(18)
+for tick in ax.yaxis.get_major_ticks():
+    tick.label1.set_fontsize(18)
+plt.xlabel('Time', fontsize=40)
+plt.ylabel('BTC Price(USD)', fontsize=40)
+plt.legend(loc=2, prop={'size': 25})
+plt.show()
