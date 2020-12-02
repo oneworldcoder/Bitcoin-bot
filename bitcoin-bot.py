@@ -91,3 +91,66 @@ plt.xlabel('Time', fontsize=40)
 plt.ylabel('BTC Price(USD)', fontsize=40)
 plt.legend(loc=2, prop={'size': 25})
 plt.show()
+
+
+df.Timestamp = pd.to_datetime(df.Timestamp, unit='s')
+
+# Resampling to daily frequency
+df.index = df.Timestamp
+df = df.resample('D').mean()
+df.head()
+# Resampling to monthly frequency
+df_month = df.resample('M').mean()
+df_month.head()
+
+# Resampling to annual frequency
+df_year = df.resample('A-DEC').mean()
+df_year.head()
+
+# Resampling to quarterly frequency
+df_Q = df.resample('Q-DEC').mean()
+df_Q.head()
+
+fig = plt.figure(figsize=[15, 7])
+plt.suptitle('Bitcoin exchanges, mean USD', fontsize=22)
+
+plt.subplot(221)
+plt.plot(df.Weighted_Price, '-', label='By Days')
+plt.legend()
+
+plt.subplot(222)
+plt.plot(df_month.Weighted_Price, '-', label='By Months')
+plt.legend()
+
+plt.subplot(223)
+plt.plot(df_Q.Weighted_Price, '-', label='By Quarters')
+plt.legend()
+
+plt.subplot(224)
+plt.plot(df_year.Weighted_Price, '-', label='By Years')
+plt.legend()
+
+# plt.tight_layout()
+plt.show()
+
+plt.figure(figsize=[15,7])
+sm.tsa.seasonal_decompose(df_month.Weighted_Price).plot()
+print("Dickey–Fuller test: p=%f" % sm.tsa.stattools.adfuller(df_month.Weighted_Price)[1])
+plt.show()
+
+df_month['Weighted_Price_box'], lmbda = stats.boxcox(df_month.Weighted_Price)
+print("Dickey–Fuller test: p=%f" % sm.tsa.stattools.adfuller(df_month.Weighted_Price)[1])
+
+df_month['prices_box_diff'] = df_month.Weighted_Price_box - df_month.Weighted_Price_box.shift(12)
+print("Dickey–Fuller test: p=%f" % sm.tsa.stattools.adfuller(df_month.prices_box_diff[12:])[1])
+
+df_month['prices_box_diff2'] = df_month.prices_box_diff - df_month.prices_box_diff.shift(1)
+plt.figure(figsize=(15,7))
+
+# STL-decomposition
+sm.tsa.seasonal_decompose(df_month.prices_box_diff2[13:]).plot()   
+print("Dickey–Fuller test: p=%f" % sm.tsa.stattools.adfuller(df_month.prices_box_diff2[13:])[1])
+
+plt.show()
+
+jovian.commit(project=project)
