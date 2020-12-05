@@ -153,4 +153,32 @@ print("Dickey–Fuller test: p=%f" % sm.tsa.stattools.adfuller(df_month.prices_b
 
 plt.show()
 
+Qs = range(0, 2)
+qs = range(0, 3)
+Ps = range(0, 3)
+ps = range(0, 3)
+D=1
+d=1
+parameters = product(ps, qs, Ps, Qs)
+parameters_list = list(parameters)
+len(parameters_list)
+
+# Model Selection
+results = []
+best_aic = float("inf")
+warnings.filterwarnings('ignore')
+for param in parameters_list:
+    try:
+        model=sm.tsa.statespace.SARIMAX(df_month.Weighted_Price_box, order=(param[0], d, param[1]), 
+                                        seasonal_order=(param[2], D, param[3], 12)).fit(disp=-1)
+    except ValueError:
+        print('wrong parameters:', param)
+        continue
+    aic = model.aic
+    if aic < best_aic:
+        best_model = model
+        best_aic = aic
+        best_param = param
+    results.append([param, model.aic])
+
 jovian.commit(project=project)
